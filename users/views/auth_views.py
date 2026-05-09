@@ -6,6 +6,7 @@ from users.models import *
 from commissions.models import *
 from core.models import Tag
 from users.decorators import role_required
+from users.services.send_OTP import send_otp_service
 
 def home(request):
     user = request.user
@@ -120,3 +121,21 @@ def logout_view(request):
     messages.success(request, "Logged out successfully")
     return redirect("login")
 
+
+def send_OTP(request):
+    if request.method == "POST":
+
+        email = request.POST.get('email')
+
+        if not User.objects.filter(email=email).exists():
+            messages.error(request,'Account doesnt exist')
+            return redirect('send_OTP')
+
+        user = User.objects.filter(email=email).exists()
+
+        send_otp_service.delay(email,user.username)
+        
+
+
+
+    return render(request, "auth/resetpassword.html")

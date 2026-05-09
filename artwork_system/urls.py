@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.urls import path,include
 from django.conf import settings
 from django.conf.urls.static import static
-from users.views.auth_views import home,login_view,register_view,logout_view
+from users.views.auth_views import home,login_view,register_view,logout_view,send_OTP
 
 urlpatterns = [
     
@@ -12,6 +12,7 @@ urlpatterns = [
     path('auth/login/',login_view,name="login"),
     path('auth/register/',register_view,name="register"),
     path('auth/logout/',logout_view,name="logout"),
+    path('auth/reset/',send_OTP,name="send_OTP"),
 
     path('users/', include('users.urls')),
     path('core/', include('core.urls')),
