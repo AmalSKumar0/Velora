@@ -8,7 +8,7 @@ Based on the provided classical ER diagram symbols:
 *   **Lines**: Links
 
 ```mermaid
-%%{init: {"flowchart": {"curve": "linear", "nodeSpacing": 30, "rankSpacing": 80, "padding": 15}, "themeVariables": {"fontSize": "14px"}}}%%
+%%{init: {"flowchart": {"curve": "linear", "nodeSpacing": 5, "rankSpacing": 5, "padding": 2}, "themeVariables": {"fontSize": "8px"}}}%%
 flowchart LR
     %% Entities
     User[User]
