@@ -463,3 +463,151 @@ erDiagram
         datetime created_at
     }
 ```
+
+## 3. Database Tables Detail
+
+### `users_user`
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | UUID | Primary Key | Auto-generated UUID |
+| `username` | String | Unique | User's unique handle |
+| `role` | String | | client / artist |
+| `bio` | Text | Optional | User biography |
+| `profile_image` | String | Optional | File path to profile image |
+| `created_at` | DateTime | | Timestamp of creation |
+
+### `users_artistprofile`
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | UUID | Primary Key | Auto-generated UUID |
+| `user_id` | UUID | Foreign Key (OneToOne) | Links to `users_user` |
+| `display_name` | String | | Artist's public name |
+| `bio` | Text | Optional | Artist's biography |
+| `portfolioURL` | URL | | External portfolio link |
+| `is_available` | Boolean | Default: True | Availability for commissions |
+| `created_at` | DateTime | | Timestamp of creation |
+
+### `users_portfolioitem`
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | UUID | Primary Key | Auto-generated UUID |
+| `artist_id` | UUID | Foreign Key | Links to `users_artistprofile` |
+| `title` | String | | Title of the portfolio item |
+| `image` | String | Optional | File path to the image |
+| `created_at` | DateTime | | Timestamp of creation |
+
+### `core_tag`
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | Integer | Primary Key | Auto-incrementing ID |
+| `name` | String | Unique | Tag name |
+
+### `commissions_request`
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | UUID | Primary Key | Auto-generated UUID |
+| `client_id` | UUID | Foreign Key | Links to `users_user` |
+| `title` | String | | Title of the request |
+| `description` | Text | | Detailed request description |
+| `budget_min` | Integer | | Minimum budget |
+| `budget_max` | Integer | | Maximum budget |
+| `status` | String | Default: 'open' | open, in_progress, completed, etc. |
+| `created_at` | DateTime | | Timestamp of creation |
+
+### `commissions_requestimage`
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | UUID | Primary Key | Auto-generated UUID |
+| `request_id` | UUID | Foreign Key | Links to `commissions_request` |
+| `image` | String | | Reference image file path |
+
+### `commissions_proposal`
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | UUID | Primary Key | Auto-generated UUID |
+| `request_id` | UUID | Foreign Key | Links to `commissions_request` |
+| `artist_id` | UUID | Foreign Key | Links to `users_artistprofile` |
+| `price` | Integer | | Proposed price |
+| `message` | Text | | Proposal message |
+| `delivery_days` | Integer | | Estimated delivery in days |
+| `status` | String | Default: 'pending' | pending, accepted, rejected |
+| `created_at` | DateTime | | Timestamp of creation |
+
+### `commissions_order`
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | UUID | Primary Key | Auto-generated UUID |
+| `request_id` | UUID | Foreign Key | Links to `commissions_request` |
+| `proposal_id` | UUID | Foreign Key (OneToOne) | Links to `commissions_proposal` |
+| `client_id` | UUID | Foreign Key | Links to `users_user` |
+| `artist_id` | UUID | Foreign Key | Links to `users_artistprofile` |
+| `amount` | Integer | | Agreed upon order amount |
+| `status` | String | Default: 'payment_pending' | current order state |
+| `revision_count` | Integer | Default: 0 | Number of revisions used |
+| `created_at` | DateTime | | Timestamp of creation |
+| `updated_at` | DateTime | | Timestamp of last update |
+
+### `commissions_submission`
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | UUID | Primary Key | Auto-generated UUID |
+| `order_id` | UUID | Foreign Key | Links to `commissions_order` |
+| `version` | Integer | | Submission version number |
+| `preview_file` | String | | Path to preview file |
+| `original_file` | String | | Path to original high-res file |
+| `created_at` | DateTime | | Timestamp of creation |
+
+### `commissions_submissionreview`
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | UUID | Primary Key | Auto-generated UUID |
+| `submission_id` | UUID | Foreign Key | Links to `commissions_submission` |
+| `reviewed_by_id` | UUID | Foreign Key | Links to `users_user` |
+| `action` | String | | approved or changes_requested |
+| `comment` | Text | Optional | Reviewer's comment |
+| `created_at` | DateTime | | Timestamp of creation |
+
+### `commissions_orderupdate`
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | Integer | Primary Key | Auto-incrementing ID |
+| `message` | Text | Optional | Update message content |
+| `submission_id` | UUID | Foreign Key | Links to `commissions_submission` |
+| `created_at` | DateTime | | Timestamp of creation |
+
+### `commissions_review`
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | UUID | Primary Key | Auto-generated UUID |
+| `order_id` | UUID | Foreign Key (OneToOne) | Links to `commissions_order` |
+| `client_id` | UUID | Foreign Key | Links to `users_user` |
+| `artist_id` | UUID | Foreign Key | Links to `users_artistprofile` |
+| `rating` | Integer | Min: 1, Max: 5 | Star rating |
+| `comment` | Text | Optional | Review comment |
+| `created_at` | DateTime | | Timestamp of creation |
+
+### `commissions_dispute`
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | UUID | Primary Key | Auto-generated UUID |
+| `order_id` | UUID | Foreign Key | Links to `commissions_order` |
+| `raised_by_id` | UUID | Foreign Key | Links to `users_user` |
+| `reason` | Text | | Reason for the dispute |
+| `status` | String | Default: 'open' | open, resolved, rejected |
+| `created_at` | DateTime | | Timestamp of creation |
+
+### `payments_payment`
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | UUID | Primary Key | Auto-generated UUID |
+| `order_id` | UUID | Foreign Key (OneToOne) | Links to `commissions_order` |
+| `amount` | Integer | | Payment amount |
+| `status` | String | Default: 'pending' | pending, held, released, etc. |
+| `provider` | String | | Payment provider name |
+| `provider_payment_id` | String | Optional | Provider's transaction ID |
+| `released_at` | DateTime | Optional | When payment was released |
+| `refunded_at` | DateTime | Optional | When payment was refunded |
+| `provider_order_id` | String | Optional | Provider's order ID |
+| `created_at` | DateTime | | Timestamp of creation |
+
+*Note: Many-to-Many relationships for `Tag` (with `ArtistProfile`, `PortfolioItem`, and `Request`) are managed by intermediate tables generated by Django.*
