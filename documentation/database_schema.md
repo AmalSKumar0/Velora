@@ -9,7 +9,7 @@ Based on the provided classical ER diagram symbols:
 
 ```mermaid
 %%{init: {"flowchart": {"curve": "linear"}}}%%
-flowchart TD
+flowchart LR
     %% Entities
     User[User]
     ArtistProfile[ArtistProfile]
