@@ -13,6 +13,15 @@ DEBUG = os.getenv("DEBUG") == "True"
 RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
 RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
 
+smtp_server = os.getenv("smtp_server")
+smtp_port = os.getenv("smtp_port")
+email_id =  os.getenv("email_id")
+password_email =  os.getenv("password_email")
+
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
+
+
 ALLOWED_HOSTS = ["velora.amalskumar.dev","127.0.0.1"]
 
 INSTALLED_APPS = [
@@ -113,5 +122,3 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 
 # cache
-CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
-CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379/0"

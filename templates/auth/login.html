@@ -58,38 +58,54 @@
     >
       <h1 class="font-display text-5xl mb-2">Welcome Back</h1>
       <p class="text-gray-600 font-medium mb-8">Log in to manage your commissions.</p>
-      <form method="post">
+      
+      
+      
+      <form id="forgot-password-form" method="post" action="{% url 'send_OTP' %}">
         {% csrf_token %}
-        <div>
-          <label class="block font-bold mb-2 text-sm">Email Address</label>
-          <input 
-            required
-            type="email"
-            name="email" 
-            placeholder="you@example.com" 
-            class="w-full border-[3px] border-black rounded-xl px-4 py-3 font-medium focus:outline-none focus:ring-4 focus:ring-[#ffc86b]/50 transition-all"
-          >
-        </div>
-        
-        <div>
-          <div class="flex justify-between mb-2">
-            <label class="block font-bold text-sm">Password</label>
-            <a href="{% url 'send_OTP' %}" class="text-sm font-bold text-gray-500 hover:text-black hover:underline">Forgot?</a>
-          </div>
-          <input 
-            required
-            type="password" 
-            name="password"
-            placeholder="••••••••" 
-            class="w-full border-[3px] border-black rounded-xl px-4 py-3 font-medium focus:outline-none focus:ring-4 focus:ring-[#ffc86b]/50 transition-all"
-          >
-        </div>
-        <br>
-        <button type="submit" class="w-full bg-[#1a1a1a] text-white rounded-xl py-4 font-bold text-lg flex items-center justify-center gap-2 hover:bg-black transition-colors border-[3px] border-black shadow-[4px_4px_0px_0px_#ffc86b] hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px]">
-          Log In <i data-lucide="arrow-right" class="w-5 h-5"></i>
-        </button>
+        <input type="hidden" name="forgotemail">
       </form>
 
+<form method="post">
+  {% csrf_token %}
+  
+  <div>
+    <label class="block font-bold mb-2 text-sm">Email Address</label>
+    <input 
+      required
+      type="email"
+      name="email" 
+      placeholder="you@example.com" 
+      class="w-full border-[3px] border-black rounded-xl px-4 py-3 font-medium focus:outline-none focus:ring-4 focus:ring-[#ffc86b]/50 transition-all"
+    >
+  </div>
+  
+  <div class="mt-4"> <div class="flex justify-between mb-2">
+      <label class="block font-bold text-sm">Password</label>
+      
+      <button 
+        type="submit" 
+        form="forgot-password-form" 
+        class="text-sm font-bold text-gray-500 hover:text-black hover:underline">
+        Forgot?
+      </button>
+    </div>
+    
+    <input 
+      required
+      type="password" 
+      name="password"
+      placeholder="••••••••" 
+      class="w-full border-[3px] border-black rounded-xl px-4 py-3 font-medium focus:outline-none focus:ring-4 focus:ring-[#ffc86b]/50 transition-all"
+    >
+  </div>
+  
+  <br>
+  
+  <button type="submit" class="w-full bg-[#1a1a1a] text-white rounded-xl py-4 font-bold text-lg flex items-center justify-center gap-2 hover:bg-black transition-colors border-[3px] border-black shadow-[4px_4px_0px_0px_#ffc86b] hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px]">
+    Log In <i data-lucide="arrow-right" class="w-5 h-5"></i>
+  </button>
+</form>
       <div class="mt-8 text-center">
         <p class="text-sm font-medium text-gray-600">
           By logging in, you agree to our <a href="{% url 'register' %}" class="font-bold text-black hover:underline">Terms of Service</a> and <a href="#" class="font-bold text-black hover:underline">Privacy Policy</a>.
@@ -98,17 +114,377 @@
    
   </div> </div>
 
+  {% if send %}
+
+<form id="retry-password-form" method="post" action="{% url 'send_OTP' %}">
+        {% csrf_token %}
+        <input type="hidden" value="{{email}}" name="forgotemail">
+</form>
+<div id="otpModal"
+  class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity duration-300">
+  
+  <div id="otpContent"
+    class="w-full max-w-md bg-white border-[4px] border-black rounded-[2.5rem] p-8 md:p-10 shadow-[16px_16px_0px_0px_#ffc86b] relative transform scale-100 transition-transform duration-300">
+
+    <button type="button"
+    onclick="closeOTPModal()"
+      class="absolute top-6 right-6 w-10 h-10 bg-gray-100 text-black border-[3px] border-black rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] z-20">
+      <i data-lucide="x" class="w-5 h-5 stroke-[3px]"></i>
+    </button>
+
+    <div
+      class="w-16 h-16 bg-[#ffc86b] border-[3px] border-black rounded-2xl flex items-center justify-center mb-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+      <i data-lucide="shield-check" class="w-8 h-8 text-black stroke-[3px]"></i>
+    </div>
+
+    <h2 class="font-display text-4xl mb-2">Enter OTP</h2>
+    <p class="text-gray-600 font-bold mb-8 text-sm">{% if message %} {{message}} {% else %} We've sent a 6-digit code to your email. Enter it below to verify.{% endif %}</p>
+
+    <form method="POST" action="{% url 'resetotp' %}" class="space-y-8">
+      {% csrf_token %}
+     <div id="otpContainer" class="flex justify-between gap-2 sm:gap-3">
+    <input type="text" maxlength="1" class="otp-input w-full h-14 text-center font-black text-2xl bg-[#f9f6f0] border-[3px] border-black rounded-xl">
+    <input type="text" maxlength="1" class="otp-input w-full h-14 text-center font-black text-2xl bg-[#f9f6f0] border-[3px] border-black rounded-xl">
+    <input type="text" maxlength="1" class="otp-input w-full h-14 text-center font-black text-2xl bg-[#f9f6f0] border-[3px] border-black rounded-xl">
+    <input type="text" maxlength="1" class="otp-input w-full h-14 text-center font-black text-2xl bg-[#f9f6f0] border-[3px] border-black rounded-xl">
+    <input type="text" maxlength="1" class="otp-input w-full h-14 text-center font-black text-2xl bg-[#f9f6f0] border-[3px] border-black rounded-xl">
+    <input type="text" maxlength="1" class="otp-input w-full h-14 text-center font-black text-2xl bg-[#f9f6f0] border-[3px] border-black rounded-xl">
+</div>
+
+<input type="hidden" name="otp_code" id="combinedOTP">
+<input type="hidden" value="{{email}}" name="otp_code_email">
+      <button type="submit"
+        class="w-full bg-black text-white border-[3px] border-black py-4 rounded-xl font-black text-lg hover:bg-gray-800 transition-all shadow-[4px_4px_0px_0px_#ffc86b] hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] flex items-center justify-center gap-2">
+        Verify & Proceed <i data-lucide="check-circle" class="w-5 h-5"></i>
+      </button>
+    </form>
+
+    <div class="mt-6 text-center">
+      <p class="text-sm font-bold text-gray-500">Didn't receive the code? <button form="retry-password-form" class="text-black hover:underline underline-offset-2">Resend</button></p>
+    </div>
+
+  </div>
+
+{% endif %}
+
+
   <script>
-    lucide.createIcons();
+document.addEventListener("DOMContentLoaded", () => {
+
+    const otpInputs = [...document.querySelectorAll(".otp-input")];
+    const otpContainer = document.getElementById("otpContainer");
+    const combinedOTP = document.getElementById("combinedOTP");
+
+    if (!otpInputs.length) return;
+
+    function updateOTP() {
+        combinedOTP.value = otpInputs.map(i => i.value).join("");
+    }
+
+    function focusFirstEmpty() {
+        const empty = otpInputs.find(input => !input.value);
+
+        if (empty) {
+            empty.focus();
+        } else {
+            otpInputs[otpInputs.length - 1].focus();
+        }
+    }
+
+    // Automatically focus first box when modal opens
+    setTimeout(() => {
+        otpInputs[0].focus();
+    }, 100);
+
+    // Click anywhere in OTP area
+    otpContainer.addEventListener("click", focusFirstEmpty);
+
+    otpInputs.forEach((input, index) => {
+
+        input.setAttribute("inputmode", "numeric");
+        input.setAttribute("autocomplete", "one-time-code");
+
+        input.addEventListener("input", e => {
+
+            let value = e.target.value.replace(/\D/g, "");
+
+            if (!value) {
+                updateOTP();
+                return;
+            }
+
+            // Handle multiple pasted digits
+            if (value.length > 1) {
+
+                [...value].forEach((digit, i) => {
+                    if (otpInputs[index + i]) {
+                        otpInputs[index + i].value = digit;
+                    }
+                });
+
+                const nextIndex = Math.min(
+                    index + value.length,
+                    otpInputs.length - 1
+                );
+
+                otpInputs[nextIndex].focus();
+
+                updateOTP();
+                return;
+            }
+
+            e.target.value = value;
+
+            if (otpInputs[index + 1]) {
+                otpInputs[index + 1].focus();
+            }
+
+            updateOTP();
+        });
+
+        input.addEventListener("keydown", e => {
+
+            if (e.key === "Backspace") {
+
+                if (input.value) {
+                    input.value = "";
+                    updateOTP();
+                    e.preventDefault();
+                    return;
+                }
+
+                if (otpInputs[index - 1]) {
+                    otpInputs[index - 1].focus();
+                }
+            }
+
+            if (e.key === "ArrowLeft" && otpInputs[index - 1]) {
+                otpInputs[index - 1].focus();
+            }
+
+            if (e.key === "ArrowRight" && otpInputs[index + 1]) {
+                otpInputs[index + 1].focus();
+            }
+        });
+
+        input.addEventListener("paste", e => {
+
+            e.preventDefault();
+
+            const pasted = e.clipboardData
+                .getData("text")
+                .replace(/\D/g, "")
+                .slice(0, otpInputs.length);
+
+            [...pasted].forEach((digit, i) => {
+                otpInputs[i].value = digit;
+            });
+
+            updateOTP();
+
+            const lastIndex = Math.min(
+                pasted.length,
+                otpInputs.length - 1
+            );
+
+            otpInputs[lastIndex].focus();
+        });
+    });
+
+    const otpForm = combinedOTP.closest("form");
+
+    if (otpForm) {
+        otpForm.addEventListener("submit", updateOTP);
+    }
+});
+
+
+    const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    const isValidEmail = email => EMAIL_REGEX.test(email);
+
+    function closeOTPModal() {
+        const modal = document.getElementById("otpModal");
+        const content = document.getElementById("otpContent");
+
+        if (modal) {
+            modal.classList.add("opacity-0", "pointer-events-none");
+        }
+
+        if (content) {
+            content.classList.replace("scale-100", "scale-95");
+        }
+    }
 
     document.addEventListener("DOMContentLoaded", () => {
-      setTimeout(() => {
-        document.querySelectorAll('.motion-trigger').forEach(el => {
-          el.classList.add('motion-visible');
-          el.classList.remove('motion-hidden-bottom');
+
+        // ----------------------------
+        // OTP LOGIC
+        // ----------------------------
+
+        const otpInputs = [...document.querySelectorAll(".otp-input")];
+        const combinedOTPInput = document.getElementById("combinedOTP");
+
+        const updateOTP = () => {
+            if (!combinedOTPInput) return;
+
+            combinedOTPInput.value = otpInputs
+                .map(input => input.value)
+                .join("");
+        };
+
+        if (otpInputs.length) {
+
+            otpInputs.forEach((input, index) => {
+
+                input.addEventListener("input", e => {
+
+                    e.target.value = e.target.value
+                        .replace(/\D/g, "")
+                        .slice(0, 1);
+
+                    updateOTP();
+
+                    if (e.target.value && otpInputs[index + 1]) {
+                        otpInputs[index + 1].focus();
+                    }
+                });
+
+                input.addEventListener("keydown", e => {
+
+                    if (
+                        e.key === "Backspace" &&
+                        !e.target.value &&
+                        otpInputs[index - 1]
+                    ) {
+                        otpInputs[index - 1].focus();
+                    }
+                });
+
+                input.addEventListener("paste", e => {
+
+                    e.preventDefault();
+
+                    const code = e.clipboardData
+                        .getData("text")
+                        .replace(/\D/g, "")
+                        .slice(0, otpInputs.length);
+
+                    [...code].forEach((digit, i) => {
+                        if (otpInputs[i]) {
+                            otpInputs[i].value = digit;
+                        }
+                    });
+
+                    updateOTP();
+
+                    const lastIndex = Math.min(
+                        code.length,
+                        otpInputs.length - 1
+                    );
+
+                    otpInputs[lastIndex]?.focus();
+                });
+            });
+
+            const otpForm = combinedOTPInput?.closest("form");
+
+            otpForm?.addEventListener("submit", updateOTP);
+        }
+
+        // ----------------------------
+        // FORGOT PASSWORD EMAIL LOGIC
+        // ----------------------------
+
+        const emailInput = document.querySelector(
+            'input[name="email"]'
+        );
+
+        const hiddenEmailInput = document.querySelector(
+            'input[name="forgotemail"]'
+        );
+
+        const forgotPasswordForm = document.getElementById(
+            "forgot-password-form"
+        );
+
+        if (emailInput && hiddenEmailInput) {
+
+            const syncEmail = () => {
+                hiddenEmailInput.value =
+                    emailInput.value.trim();
+            };
+
+            emailInput.addEventListener("input", syncEmail);
+
+            emailInput.addEventListener("blur", syncEmail);
+
+            syncEmail();
+        }
+
+        if (forgotPasswordForm) {
+
+            forgotPasswordForm.addEventListener(
+                "submit",
+                event => {
+
+                    const email =
+                        hiddenEmailInput?.value?.trim() || "";
+
+                    if (!email) {
+
+                        event.preventDefault();
+
+                        alert(
+                            "Please enter your email address first."
+                        );
+
+                        return;
+                    }
+
+                    if (!isValidEmail(email)) {
+
+                        event.preventDefault();
+
+                        alert(
+                            "Please enter a valid email address."
+                        );
+
+                        return;
+                    }
+                }
+            );
+        }
+
+        // ----------------------------
+        // ANIMATION
+        // ----------------------------
+
+        requestAnimationFrame(() => {
+
+            document
+                .querySelectorAll(".motion-trigger")
+                .forEach(element => {
+
+                    element.classList.remove(
+                        "motion-hidden-bottom"
+                    );
+
+                    element.classList.add(
+                        "motion-visible"
+                    );
+                });
         });
-      }, 50);
+
+        // ----------------------------
+        // LUCIDE ICONS
+        // ----------------------------
+
+        if (window.lucide) {
+            lucide.createIcons();
+        }
     });
-  </script>
+</script>
+</div>
 </body>
 </html>

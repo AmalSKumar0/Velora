@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from users.models import *
 from commissions.models import *
 from core.models import Tag
+import secrets
 from users.decorators import role_required
 from users.services.send_OTP import send_otp_service
 
@@ -123,19 +124,62 @@ def logout_view(request):
 
 
 def send_OTP(request):
+    email = ""
     if request.method == "POST":
 
-        email = request.POST.get('email')
+        email = request.POST.get('forgotemail')
 
         if not User.objects.filter(email=email).exists():
             messages.error(request,'Account doesnt exist')
-            return redirect('send_OTP')
+            return redirect('login')
 
-        user = User.objects.filter(email=email).exists()
+        user = User.objects.filter(email=email).first()
+        print(user)
+        otp = secrets.randbelow(900000) + 100000
+        request.session["otp"] = otp
+        send_otp_service.delay(email,user.username,otp)
 
-        send_otp_service.delay(email,user.username)
-        
+    return render(request,'auth/login.html',{
+        'send':True,
+        'email':email
+    })
 
+def reset_OTP(request):
+    if request.method == "POST":
 
+        correct_otp = str(request.session.get("otp", ""))
+        user_otp = str(request.POST.get("otp_code", "")).strip()
 
-    return render(request, "auth/resetpassword.html")
+        email = request.POST.get('otp_code_email')
+
+        if correct_otp and correct_otp == user_otp:
+            request.session.pop("otp", None)
+
+            return render(
+                request,
+                "auth/resetpassword.html",{
+                    'email':email
+                }
+            )
+
+        return render(
+            request,
+            "auth/login.html",
+            {
+                "send": True,
+                "message": "Invalid OTP. Try again.",
+                'email':email
+            }
+        )
+
+    return redirect("login")
+
+def add_new_password(request):
+    if request.method == "POST":
+        newpass = str(request.session.get("new_password", ""))
+        email = request.POST.get("email")
+        user = User.objects.filter(email=email).first()
+        user.set_password(newpass) 
+        user.save()
+        messages.success(request, "Password changed successfully")
+        return redirect("login")

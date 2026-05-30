@@ -1,17 +1,18 @@
 import smtplib
 from email.message import EmailMessage
-import secrets
 from celery import shared_task
+from django.conf import settings
+
 
 @shared_task
-def send_otp_service(email,username,request):
+def send_otp_service(email,username,otp):
+
+    print("otp service reached")
 
     msg = EmailMessage()
     msg["Subject"] = "OTP to reset password"
     msg["From"] = "amalskumarofficialz@gmail.com"
     msg["To"] = email
-
-    otp = secrets.randbelow(900000) + 100000
 
     html = """<!DOCTYPE html>
             <html lang="en">
@@ -118,14 +119,12 @@ def send_otp_service(email,username,request):
     msg.add_alternative(html, subtype="html")
 
     # SMTP connection
-    smtp_server = "smtp.gmail.com"
-    smtp_port = 587
-    username = "amalskumarofficialz@gmail.com"
-    password = "ttki xaro pyao fjfz"   
+    smtp_server = settings.smtp_server
+    smtp_port = settings.smtp_port
+    username = settings.email_id
+    password = settings.password_email   
 
     with smtplib.SMTP(smtp_server, smtp_port) as server:
         server.starttls()            
         server.login(username, password)
         server.send_message(msg)
-
-    request.session["otp"] = otp
