@@ -48,6 +48,11 @@
 - Granular control over users, orders, and payments.
 - Generation of detailed **PDF Financial Reports** directly from the dashboard using WeasyPrint.
 
+### 🔑 Secure Password Reset (OTP-based)
+- **Asynchronous OTP Delivery**: Sends high-security 6-digit verification codes using **Celery** and **Redis** asynchronously, ensuring zero frontend form submission latency.
+- **Frontend Match & Security Validation**: Features instant match verification for password fields and a clean toggle to show/hide passwords using Lucide icons.
+- **Interactive UI**: Custom OTP numeric verification layout to enter codes seamlessly.
+
 ---
 
 ## 📚 Documentation
@@ -67,6 +72,7 @@ For a deeper technical dive into the architecture and state machines, check out 
 | **Database** | MySQL |
 | **Payment Gateway** | Razorpay SDK |
 | **Report Generation**| WeasyPrint |
+| **Task Queue & Cache**| Celery, Redis |
 
 ---
 
@@ -77,6 +83,7 @@ Follow these steps to run Velora locally on your machine.
 ### Prerequisites
 - Python 3.x
 - MySQL Server
+- Redis Server (for Celery background tasks)
 
 ### Installation
 
@@ -96,11 +103,20 @@ Follow these steps to run Velora locally on your machine.
    ```env
    SECRET_KEY=your_django_secret
    DEBUG=True
-   DB_NAME=velora
-   DB_USER=root
-   DB_PASSWORD=yourpassword
+   DBUser=root
+   DBPass=yourpassword
    RAZORPAY_KEY_ID=your_razorpay_key
    RAZORPAY_KEY_SECRET=your_razorpay_secret
+
+   # SMTP Settings (for Email OTP)
+   smtp_server=smtp.gmail.com
+   smtp_port=587
+   email_id=your_email@gmail.com
+   password_email=your_app_specific_password
+
+   # Celery & Redis Settings
+   CELERY_BROKER_URL=redis://127.0.0.1:6379/0
+   CELERY_RESULT_BACKEND=redis://127.0.0.1:6379/0
    ```
 
 4. **Database Migrations:**
@@ -109,7 +125,19 @@ Follow these steps to run Velora locally on your machine.
    python manage.py migrate
    ```
 
-5. **Start the Development Server:**
+5. **Start the Services and Development Server:**
+   
+   First, start **Redis**:
+   ```bash
+   redis-server
+   ```
+
+   In a separate terminal, start the **Celery worker**:
+   ```bash
+   celery -A artwork_system worker --loglevel=info
+   ```
+
+   Then, start the **Django server**:
    ```bash
    python manage.py runserver
    ```
